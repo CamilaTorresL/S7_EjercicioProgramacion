@@ -1,0 +1,10 @@
+float validarRangoFloat(float a, float b);
+float validarRangoFloatMinimo(float a);
+void leerCadenas(char *cadena, int n);
+void registrarProducto(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5]);
+void mostrarProductos(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5]);
+void buscarProducto(char nombres[5][20], int *modificar, int *encontrar);
+void editarProducto(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5], int modificar);
+void eliminarProducto(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5], int modificar);
+void calcularProduccion(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5], float *tiempoTotal, int *recursosTotales, int *calculoProduccion);
+void verificarCapacidadProduccion(float tiempoTotal, int recursosTotales);
