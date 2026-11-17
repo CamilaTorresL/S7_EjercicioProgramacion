@@ -1,5 +1,6 @@
 float validarRangoFloat(float a, float b);
 float validarRangoFloatMinimo(float a);
+int validarRangoInt(int a);
 void leerCadenas(char *cadena, int n);
 void registrarProducto(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5]);
 void mostrarProductos(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5]);

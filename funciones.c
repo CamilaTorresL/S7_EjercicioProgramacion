@@ -42,7 +42,57 @@ float validarRangoFloatMinimo(float a){
     
 }
 
+int validarRangoInt(int a){
+    int num;
+    int val, valido;
+    int c;
 
+    do
+    {
+        val = scanf(" %d", &num);
+        valido = (val == 1);
+        while((c = getchar()) != '\n' && c != EOF){
+            valido = 0;
+        };
+
+        if (num < a || !valido){
+            printf("Error: el valor ingresado es incorrecto\n");
+        }
+
+        if(c == EOF && !valido){
+            return -1;
+        }
+
+    } while (num < a || !valido);
+
+    return num;
+}
+
+int validarRangoIntMaxMin(int a, int b){
+    int num;
+    int val, valido;
+    int c;
+
+    do
+    {
+        val = scanf(" %d", &num);
+        valido = (val == 1);
+        while((c = getchar()) != '\n' && c != EOF){
+            valido = 0;
+        };
+
+        if (num < a || num > b || !valido){
+            printf("Error: el valor ingresado es incorrecto\n");
+        }
+
+        if(c == EOF && !valido){
+            return -1;
+        }
+
+    } while (num < a || num > b || !valido);
+
+    return num;
+}
 
 void leerCadenas(char *cadena, int n){
 
@@ -75,17 +125,16 @@ void registrarProducto(char nombres[5][20], float tiempoFabricacion[5], int recu
         {
             do
             {
-                printf("Ingrese el nombre del producto número %d:\n", i + 1);
+                printf("Ingrese el nombre del producto numero %d:\n", i + 1);
                 leerCadenas(nombrePrueba, 20);
 
                 repetido = 0;
 
                 for (int contador = 0; contador < 5; contador++)
                 {
-                    if (cantidadDemandada[contador] != 0 && strcasecmp(nombrePrueba,nombres[contador])==0){
+                    if (cantidadDemandada[contador] > 0 && strcasecmp(nombrePrueba,nombres[contador])==0){
                         printf("Ya existe un producto con el mismo nombre\n");
                         repetido = 1;
-                        break;
                     }
                 }
             } while (repetido == 1);
@@ -93,17 +142,27 @@ void registrarProducto(char nombres[5][20], float tiempoFabricacion[5], int recu
             strcpy(nombres[i],nombrePrueba);
             
             
-            printf("Ingrese el tiempo de fabricación por unidad en minutos del producto número %d:\n", i + 1);
+            printf("Ingrese el tiempo de fabricacion por unidad en minutos del producto numero %d:\n", i + 1);
             tiempoFabricacion[i] = validarRangoFloatMinimo(0);
-            printf("Ingrese los recursos necesarios por unidad del producto número %d:\n", i + 1);
-            recursosUnidad[i] = validarRangoFloatMinimo(0);
+            printf("Ingrese los recursos necesarios por unidad del producto numero %d:\n", i + 1);
+            recursosUnidad[i] = validarRangoInt(1);
             printf("Ingrese la cantidad demandada del producto %d\n", i + 1);
-            cantidadDemandada[i] = validarRangoFloatMinimo(0);
-            contadorProductos++;
+            cantidadDemandada[i] = validarRangoInt(1);
+            
         }
         else
         {
             printf("Error: el espacio seleccionado ya se encuentra ocupado\n");
+        }
+        
+        contadorProductos = 0;
+        
+        for (int contador = 0; contador < 5; contador++)
+        {
+            if (cantidadDemandada[contador] > 0)
+            {
+                contadorProductos++;
+            }
         }
 
         if (contadorProductos < 5){
@@ -116,7 +175,6 @@ void registrarProducto(char nombres[5][20], float tiempoFabricacion[5], int recu
         }
 
     } while (resp == 1);
-    
 }
 
 void mostrarProductos(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5]){
@@ -166,7 +224,7 @@ void editarProducto(char nombres[5][20], float tiempoFabricacion[5], int recurso
     
     printf("¿Que desea modificar?\n");
     printf("1. Nombre del producto\n");
-    printf("2. Tiempo de fabricación por unidad\n");
+    printf("2. Tiempo de fabricacion por unidad\n");
     printf("3. Recursos necesarios por unidad\n");
     printf("4. Cantidad demandada\n");
     printf(">>");
@@ -181,20 +239,20 @@ void editarProducto(char nombres[5][20], float tiempoFabricacion[5], int recurso
 
         break;
     case 2:
-        printf("Ingrese el tiempo de fabricación por unidad en minutos\n");
+        printf("Ingrese el tiempo de fabricacion por unidad en minutos\n");
         tiempoFabricacion[modificar] = validarRangoFloatMinimo(0);
         printf("El cambio se ha realizado con exito\n");
 
         break;
     case 3:
         printf("Ingrese la cantidad de recursos necesarios por unidad\n");
-        recursosUnidad[modificar] = validarRangoFloatMinimo(0);
+        recursosUnidad[modificar] = validarRangoInt(1);
         printf("El cambio se ha realizado con exito\n");
         
         break;
     case 4:
         printf("Ingrese la cantidad demandada\n");
-        cantidadDemandada[modificar] = validarRangoFloatMinimo(0);
+        cantidadDemandada[modificar] = validarRangoInt(1);
         printf("El cambio se ha realizado con exito\n");
 
         break;
@@ -205,7 +263,7 @@ void eliminarProducto(char nombres[5][20], float tiempoFabricacion[5], int recur
     
     int resp = 0;
     
-    printf("¿Está seguro de eliminar el producto?: (1.si / 2.no)\n");
+    printf("¿Esta seguro de eliminar el producto?: (1.si / 2.no)\n");
     resp = validarRangoFloat(1,2);
 
     if (resp == 1){
@@ -217,7 +275,7 @@ void eliminarProducto(char nombres[5][20], float tiempoFabricacion[5], int recur
         printf("El producto se elimino correctamente\n");
     }
     else{
-        printf("Se canceló la eliminación del producto\n");
+        printf("Se cancelo la eliminacion del producto\n");
     }
 }
 
@@ -255,10 +313,10 @@ void verificarCapacidadProduccion(float tiempoTotal, int recursosTotales){
     float tiempoDisponible;
     int recursosDisponibles;
 
-    printf("Ingrese el tiempo de producción disponible en minutos\n");
+    printf("Ingrese el tiempo de produccion disponible en minutos\n");
     tiempoDisponible = validarRangoFloatMinimo(0);
     printf("Ingrese la cantidad de recursos disponibles\n");
-    recursosDisponibles = validarRangoFloatMinimo(0);
+    recursosDisponibles = validarRangoInt(0);
 
     printf("%-25s %s\n", "Tiempo necesario", "Tiempo disponible");
     printf("%-25.2f %.2f\n", tiempoTotal, tiempoDisponible);
@@ -271,5 +329,4 @@ void verificarCapacidadProduccion(float tiempoTotal, int recursosTotales){
     else{
         printf("Estado: INSUFICIENTE\n");
     }
-
 }

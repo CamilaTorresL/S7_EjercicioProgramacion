@@ -20,13 +20,13 @@ int main (int argc, char *argv[]) {
 
     do
     {
-        printf("Seleccione una opción:\n");
+        printf("Seleccione una opcion:\n");
         printf("1. Registrar productos\n");
         printf("2. Mostrar productos\n");
         printf("3. Editar producto\n");
         printf("4. Eliminar producto\n");
-        printf("5. Calcular producción\n");
-        printf("6. Verificar la capacidad de producción\n");
+        printf("5. Calcular produccion\n");
+        printf("6. Verificar la capacidad de produccion\n");
         printf("7. Salir del programa\n");
         printf(">>");
         opc = validarRangoFloat(1,7);
@@ -73,7 +73,7 @@ int main (int argc, char *argv[]) {
                 verificarCapacidadProduccion(tiempoTotal, recursosTotales);
             }
             else{
-                printf("No se puede verificar la capacidad de producción sin antes calcular la producción\n");
+                printf("No se puede verificar la capacidad de produccion sin antes calcular la produccion\n");
             }
 
             break;
@@ -90,7 +90,7 @@ int main (int argc, char *argv[]) {
             respuesta = 2;
         }
         else{
-            printf("¿Desea seleccionar otra opción?: (1.si / 2.no)\n");
+            printf("¿Desea seleccionar otra opcion?: (1.si / 2.no)\n");
             respuesta = validarRangoFloat(1,2);
         }
 
