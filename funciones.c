@@ -586,7 +586,7 @@ void agregarInsumoReceta(char tratamientos[5][40], char nombresInsumos[5][40], c
         return;
     }
 
-    printf("Insumis Disponibles\n");
+    printf("Insumos Disponibles\n");
     for (int i = 0; i < 5; i++){
         if (stockMinimo[i] > 0) {
             printf("%d. %s\n", i, nombresInsumos[i]);
@@ -636,11 +636,10 @@ void agregarInsumoReceta(char tratamientos[5][40], char nombresInsumos[5][40], c
     cantidad = validarRangoFloatMinimo(0.0001f);
 
     printf("Seleccione la modalidad de consumo:\n");
-    printf("1. Por sesion\n");
-    printf("2. Por diente\n");
-    printf("3. Por procedimiento\n");
+    printf("1. Por diente\n");
+    printf("2. Por procedimiento\n");
     printf(">> ");
-    modalidad = validarRangoIntMaxMin(1, 3);
+    modalidad = validarRangoIntMaxMin(1, 2);
 
     strcpy(insumosTratamientos[posicionTratamiento][columna], nombresInsumos[posicionInsumo]);
     cantidadesTratamientos[posicionTratamiento][columna] = cantidad;
@@ -653,8 +652,6 @@ void agregarInsumoReceta(char tratamientos[5][40], char nombresInsumos[5][40], c
     printf("Cantidad: %.3f %s\n", cantidad, unidadMedida[posicionInsumo]);
 
     if (modalidad == 1){
-        printf("Modalidad: Por sesion\n");
-    } else if (modalidad == 2){
         printf("Modalidad: Por diente\n");
     } else{
         printf("Modalidad: Por procedimiento\n");
@@ -673,9 +670,7 @@ void mostrarInsumosTratamiento(int posicionTratamiento, char nombresInsumos[5][4
 
     for (int i = 0; i < 5; i++){
         if (strcmp(insumosTratamientos[posicionTratamiento][i], "-") != 0){
-            hayInsumos++;
-            posicionInsumo = 0;
-            encontradoInsumo = 0;
+            hayInsumos++, posicionInsumo = 0, encontradoInsumo = 0;
 
             for (int j = 0; j < 5; j++){
                 if (stockMinimo[j] > 0 && strcasecmp(nombresInsumos[j], insumosTratamientos[posicionTratamiento][i]) == 0) {
@@ -694,10 +689,8 @@ void mostrarInsumosTratamiento(int posicionTratamiento, char nombresInsumos[5][4
             }
 
             if (modalidadesTratamientos[posicionTratamiento][i] == 1) {
-                printf("Modalidad: Por sesion\n");
-            } else if (modalidadesTratamientos[posicionTratamiento][i] == 2) {
                 printf("Modalidad: Por diente\n");
-            } else if (modalidadesTratamientos[posicionTratamiento][i] == 3) {
+            } else if (modalidadesTratamientos[posicionTratamiento][i] == 2) {
                 printf("Modalidad: Por procedimiento\n");
             }
         }
@@ -745,10 +738,8 @@ void mostrarTratamientos(char tratamientos[5][40], char nombresInsumos[5][40], c
                         }
 
                         if (modalidadesTratamientos[i][j] == 1){
-                            printf("Modalidad: Por sesion\n");
-                        } else if (modalidadesTratamientos[i][j] == 2){
                             printf("Modalidad: Por diente\n");
-                        } else if (modalidadesTratamientos[i][j] == 3){
+                        } else if (modalidadesTratamientos[i][j] == 2){
                             printf("Modalidad: Por procedimiento\n");
                         }
                     }
@@ -867,10 +858,9 @@ void editarTratamiento(char tratamientos[5][40], char nombresInsumos[5][40], cha
                 break;
             }
 
-            printf("\nINSUMOS DISPONIBLES\n");
+            printf("Insumos disponibles:\n");
             for (int i = 0; i < 5; i++){
-                if (stockMinimo[i] > 0)
-                {
+                if (stockMinimo[i] > 0){
                     printf("%d. %s\n", i, nombresInsumos[i]);
                 }
             }
@@ -900,10 +890,9 @@ void editarTratamiento(char tratamientos[5][40], char nombresInsumos[5][40], cha
             nuevaCantidad = validarRangoFloatMinimo(0.0001f);
 
             printf("Seleccione la nueva modalidad:\n");
-            printf("1. Por sesion\n");
-            printf("2. Por diente\n");
-            printf("3. Por procedimiento\n");
-            modalidad = validarRangoIntMaxMin(1, 3);
+            printf("1. Por diente\n");
+            printf("2. Por procedimiento\n");
+            modalidad = validarRangoIntMaxMin(1, 2);
 
             strcpy(insumosTratamientos[posicionTratamiento][posicionDetalle], nombresInsumos[posicionInsumo]);
             cantidadesTratamientos[posicionTratamiento][posicionDetalle] = nuevaCantidad;
@@ -950,10 +939,9 @@ void editarTratamiento(char tratamientos[5][40], char nombresInsumos[5][40], cha
             }
 
             printf("Seleccione la nueva modalidad:\n");
-            printf("1. Por sesion\n");
-            printf("2. Por diente\n");
-            printf("3. Por procedimiento\n");
-            modalidad = validarRangoIntMaxMin(1, 3);
+            printf("1. Por diente\n");
+            printf("2. Por procedimiento\n");
+            modalidad = validarRangoIntMaxMin(1, 2);
 
             modalidadesTratamientos[posicionTratamiento][posicionDetalle] = modalidad;
             printf("La modalidad se modifico correctamente.\n");
@@ -992,7 +980,7 @@ void editarTratamiento(char tratamientos[5][40], char nombresInsumos[5][40], cha
 
 void capacidadTratamientos(char tratamientos[5][40], char nombresInsumos[5][40], char unidadMedida[5][20], float stockMinimo[5], char tipoPresentacion[5][20], float cantidadInsumo[5], char caducidad[5][20], char insumosTratamientos[5][5][40], float cantidadesTratamientos[5][5], int modalidadesTratamientos[5][5], int cantidadInsumosTratamiento[5]) {
 
-    int contInsumos = 0, contTratamientos = 0, contRecetas = 0, posicionTratamiento, posicionInsumo = 0, encontradoInsumo, cantidadProcedimientos, cantidadSesiones, cantidadDientes, tieneSesion, tieneDiente, resp = 2, tratamientosPlanificados = 0, recetaValida, tieneReceta, i, j, k, contInsuficientes = 0;
+    int contInsumos = 0, contTratamientos = 0, contRecetas = 0, posicionTratamiento, posicionInsumo = 0, encontradoInsumo, cantidadProcedimientos, cantidadDientes, tieneDiente, resp = 2, tratamientosPlanificados = 0, recetaValida, tieneReceta, i, j, k, contInsuficientes = 0;
     float demandaInsumos[5] = {0}, consumo, faltante;
 
     for (i = 0; i < 5; i++){
@@ -1083,14 +1071,14 @@ void capacidadTratamientos(char tratamientos[5][40], char nombresInsumos[5][40],
                     break;
                 }
 
-                if (strlen(tipoPresentacion[posicionInsumo]) == 0 || strlen(caducidad[posicionInsumo]) == 0 || cantidadInsumo[posicionInsumo] <= 0) {
+                if (strlen(tipoPresentacion[posicionInsumo]) == 0 || strlen(caducidad[posicionInsumo]) == 0) {
                     printf("El insumo %s no tiene una presentacion completa registrada.\n", nombresInsumos[posicionInsumo]);
                     printf("Primero debe registrar su presentacion, cantidad y caducidad.\n");
                     recetaValida = 0;
                     break;
                 }
 
-                if (cantidadesTratamientos[posicionTratamiento][j] <= 0 || modalidadesTratamientos[posicionTratamiento][j] < 1 || modalidadesTratamientos[posicionTratamiento][j] > 3) {
+                if (cantidadesTratamientos[posicionTratamiento][j] <= 0 || modalidadesTratamientos[posicionTratamiento][j] < 1 || modalidadesTratamientos[posicionTratamiento][j] > 2) {
                     printf("La receta del insumo %s tiene datos de consumo incorrectos.\n", nombresInsumos[posicionInsumo]);
                     recetaValida = 0;
                     break;
@@ -1111,7 +1099,6 @@ void capacidadTratamientos(char tratamientos[5][40], char nombresInsumos[5][40],
             break;
         }
 
-        tieneSesion = 0;
         tieneDiente = 0;
 
         for (j = 0; j < 5; j++){
@@ -1119,23 +1106,8 @@ void capacidadTratamientos(char tratamientos[5][40], char nombresInsumos[5][40],
             if (strcmp(insumosTratamientos[posicionTratamiento][j], "-") != 0){
 
                 if (modalidadesTratamientos[posicionTratamiento][j] == 1){
-                    tieneSesion = 1;
-                }
-
-                if (modalidadesTratamientos[posicionTratamiento][j] == 2){
                     tieneDiente = 1;
                 }
-            }
-        }
-
-        cantidadSesiones = 0;
-
-        if (tieneSesion == 1) {
-            printf("Ingrese la cantidad total de sesiones:\n");
-            cantidadSesiones = validarRangoInt(1);
-
-            if (cantidadSesiones == -1) {
-                break;
             }
         }
 
@@ -1144,10 +1116,6 @@ void capacidadTratamientos(char tratamientos[5][40], char nombresInsumos[5][40],
         if (tieneDiente == 1) {
             printf("Ingrese la cantidad total de dientes que se intervendran:\n");
             cantidadDientes = validarRangoInt(1);
-
-            if (cantidadDientes == -1) {
-                break;
-            }
         }
 
         for (j = 0; j < 5; j++){
@@ -1169,12 +1137,9 @@ void capacidadTratamientos(char tratamientos[5][40], char nombresInsumos[5][40],
                     consumo = 0;
 
                     if (modalidadesTratamientos[posicionTratamiento][j] == 1) {
-                        consumo = cantidadesTratamientos[posicionTratamiento][j] * cantidadSesiones;
-                    }
-                    else if (modalidadesTratamientos[posicionTratamiento][j] == 2) {
                         consumo = cantidadesTratamientos[posicionTratamiento][j] * cantidadDientes;
                     }
-                    else if (modalidadesTratamientos[posicionTratamiento][j] == 3) {
+                    else if (modalidadesTratamientos[posicionTratamiento][j] == 2) {
                         consumo = cantidadesTratamientos[posicionTratamiento][j] * cantidadProcedimientos;
                     }
 

@@ -1,8 +1,6 @@
 /*
 Integrantes: Camila Torres, 
 Fecha de entrega: 15/11/2026
-Descripción del programa: Un centro odontológico requiere de un software para controlar su inventario de manera más eficiente.
-....completar
 */
 
 #include <stdio.h>
