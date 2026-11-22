@@ -1,101 +1,61 @@
 /*
 Integrantes: Camila Torres, 
 Fecha de entrega: 15/11/2026
-Descripción del programa: Una fábrica de componentes electrónicos necesita optimizar 
-su producción para cumplir con la demanda de cinco productos distintos.
-Cada producto tiene un tiempo de fabricación específico y requiere una cantidad fija de recursos.
-El equipo de ingeniería ha identificado que la línea de producción tiene limitaciones de tiempo 
-y recursos que deben ser tomadas en cuenta.
+Descripción del programa: Un centro odontológico requiere de un software para controlar su inventario de manera más eficiente.
+....completar
 */
 
 #include <stdio.h>
-#include<funciones.h>
+#include "funciones.h"
+#include <string.h>
 
 int main (int argc, char *argv[]) {
 
-    char nombres[5][20] = {{'-'}, {'-'}, {'-'}, {'-'}, {'-'}};
-    float tiempoFabricacion[5] = {0.0}, tiempoTotal = 0;
-    int recursosUnidad[5] = {0}, cantidadDemandada[5] = {0};
-    int opc, respuesta, modificar = 0, encontrar = 0, calculoProduccion = 0, recursosTotales = 0;
+    char nombresInsumos[5][40] = {"-", "-", "-", "-", "-"}, unidadMedida[5][20] = {"-", "-", "-", "-", "-"}, proveedor[5][40] = {"-", "-", "-", "-", "-"};
+    char caducidad[5][20] = {{0}}, tratamientos[5][40] = {"-", "-", "-", "-", "-"}, insumosTratamientos[5][5][40], tipoPresentacion[5][20] = {{0}};
+    float stockMinimo[5] = {0}, cantidadInsumo[5] = {0}, cantidadesTratamientos[5][5] = {0};
+    int opc, modificar = 0, encontrar = 0, modalidadesTratamientos[5][5] = {0}, cantidadInsumosTratamiento[5] = {0};
+    for (int i = 0; i < 5; i++){
+        for (int j = 0; j < 5; j++){
+            strcpy(insumosTratamientos[i][j], "-");
+        }
+    }
 
-    do
-    {
+    printf("==================================================================\n");
+    printf("                 CLINICA ODONTOLOGICA                             \n");
+    printf("Sistema de Gestion de Inventario y Planificacion de Insumos\n");
+    printf("==================================================================\n");
+
+    do {
         printf("Seleccione una opcion:\n");
-        printf("1. Registrar productos\n");
-        printf("2. Mostrar productos\n");
-        printf("3. Editar producto\n");
-        printf("4. Eliminar producto\n");
-        printf("5. Calcular produccion\n");
-        printf("6. Verificar la capacidad de produccion\n");
-        printf("7. Salir del programa\n");
-        printf(">>");
-        opc = validarRangoFloat(1,7);
+        printf("1. Gestion de inventario\n");
+        printf("2. Gestion de tratamientos y recetas\n");
+        printf("3. Calcular capacidad para realizar tratamientos\n");
+        printf("4. Salir del programa\n");
+        printf(">> ");
+        opc = validarRangoIntMaxMin(1, 4);
 
-        switch (opc)
-        {
-        case 1:
-            registrarProducto(nombres, tiempoFabricacion, recursosUnidad, cantidadDemandada);
+        switch (opc) {
+            case 1:
+                administrarInventario(&encontrar, &modificar, nombresInsumos, unidadMedida, proveedor, stockMinimo, tipoPresentacion, cantidadInsumo, caducidad, insumosTratamientos);
+                break;
 
-            break;
-        case 2:
-            mostrarProductos(nombres, tiempoFabricacion, recursosUnidad, cantidadDemandada);
+            case 2:
+                gestionTratamientos(tratamientos, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+                break;
 
-            break;
-        case 3:
+            case 3:
+                capacidadTratamientos(tratamientos, nombresInsumos, unidadMedida, stockMinimo, tipoPresentacion, cantidadInsumo, caducidad, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+                break;
 
-            buscarProducto(nombres, &modificar, &encontrar);
-
-            if (encontrar == 1){
-                editarProducto(nombres, tiempoFabricacion, recursosUnidad, cantidadDemandada, modificar);
-            }
-            else{
-                printf("No se puede modificar un producto que no existe\n");
-            }
-
-            break;
-        case 4:
-            buscarProducto(nombres, &modificar, &encontrar);
-
-            if (encontrar == 1){
-                eliminarProducto(nombres, tiempoFabricacion, recursosUnidad, cantidadDemandada, modificar); 
-            }
-            else{
-                printf("No se puede eliminar un producto que no existe\n");
-            }
-
-            break;
-        case 5:
-            calcularProduccion(nombres, tiempoFabricacion, recursosUnidad, cantidadDemandada, &tiempoTotal, &recursosTotales, &calculoProduccion);
-
-            break;
-        case 6:
-            if (calculoProduccion == 1){
-                verificarCapacidadProduccion(tiempoTotal, recursosTotales);
-            }
-            else{
-                printf("No se puede verificar la capacidad de produccion sin antes calcular la produccion\n");
-            }
-
-            break;
-
-        default:
-            printf("========================================\n");
-            printf("GRACIAS POR UTILIZAR ESTE PROGRAMA\n");
-            printf("========================================\n");
-
-            break;
-        }
-        
-        if (opc == 7){
-            respuesta = 2;
-        }
-        else{
-            printf("¿Desea seleccionar otra opcion?: (1.si / 2.no)\n");
-            respuesta = validarRangoFloat(1,2);
+            case 4:
+                printf("========================================\n");
+                printf("GRACIAS POR UTILIZAR ESTE PROGRAMA\n");
+                printf("========================================\n");
+                break;
         }
 
-    } while (respuesta == 1);
-    
+    } while (opc != 4);
 
     return 0;
 }

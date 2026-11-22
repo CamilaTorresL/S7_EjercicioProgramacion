@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<string.h>
-#include<funciones.h>
+#include "funciones.h"
 
 float validarRangoFloat(float a, float b){
 
@@ -32,11 +32,11 @@ float validarRangoFloatMinimo(float a){
         val = scanf(" %f", &numMinimo);
         while((getchar()) != '\n');
         
-        if (numMinimo < a || val != 1){
+        if (val != 1 || numMinimo < a){
             printf("Error: el valor ingresado es incorrecto\n");
         }
 
-    } while (numMinimo < a || val != 1);
+    } while (val != 1 || numMinimo < a);
 
     return numMinimo;
     
@@ -81,7 +81,7 @@ int validarRangoIntMaxMin(int a, int b){
             valido = 0;
         };
 
-        if (num < a || num > b || !valido){
+        if (!valido || num < a || num > b){
             printf("Error: el valor ingresado es incorrecto\n");
         }
 
@@ -89,7 +89,7 @@ int validarRangoIntMaxMin(int a, int b){
             return -1;
         }
 
-    } while (num < a || num > b || !valido);
+    } while (!valido || num < a || num > b);
 
     return num;
 }
@@ -109,101 +109,186 @@ void leerCadenas(char *cadena, int n){
     }
 }
 
-void registrarProducto(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5]){
-    
-    int resp;
-    int contadorProductos = 0;
-  
-    do
+void administrarInventario(int *encontrar, int *modificar, char nombresInsumos[5][40], char unidadMedida[5][20], char proveedor[5][40], float stockMinimo[5], char tipoPresentacion[5][20], float cantidadInsumo[5], char caducidad[5][20], char insumosTratamientos[5][5][40]){
+    int opcion;
+
+    printf("Seleccione una opcion:\n");
+    printf("1. Registrar un nuevo insumo\n");
+    printf("2. Mostrar insumos\n");
+    printf("3. Buscar un insumo\n");
+    printf("4. Editar insumos\n");
+    printf("5. Registrar lote\n");
+    printf("6. Hacer una reposicion o quitar insumos\n");
+    printf("7. Mostrar lote\n");
+    printf("8. Editar lote\n");
+    printf(">> ");
+    opcion = validarRangoIntMaxMin(1, 8);
+
+    switch (opcion)
     {
-        printf("¿En que espacio desea registrar el producto? (0 - 4)\n");
-        int i = validarRangoFloat(0, 4);
-        int contador = 0, repetido = 0;
-        char nombrePrueba[20];
-
-        if (cantidadDemandada[i] == 0)
+    case 1:
+        registrarInsumos(nombresInsumos, unidadMedida, proveedor, stockMinimo);
+        break;
+    case 2:
+        mostrarInsumos(nombresInsumos, unidadMedida, proveedor, stockMinimo);
+        break;
+    case 3:
+        buscarInsumo(nombresInsumos, unidadMedida, proveedor, stockMinimo, encontrar, modificar);
+        break;
+    case 4:
+        buscarInsumo(nombresInsumos, unidadMedida, proveedor, stockMinimo, encontrar, modificar);
+        if (*encontrar == 1)
         {
-            do
+            editarInsumo(nombresInsumos, unidadMedida, proveedor, stockMinimo, *modificar, insumosTratamientos);
+        }
+        else
+        {
+            printf("No se puede editar porque el insumo no existe.\n");
+        }
+        break;
+    case 5:
+        buscarInsumo(nombresInsumos, unidadMedida, proveedor, stockMinimo, encontrar, modificar);
+        if (*encontrar == 1)
+        {
+            registrarLote(modificar, tipoPresentacion, nombresInsumos, cantidadInsumo, caducidad);
+        }
+        else
+        {
+            printf("No se puede registrar el lote porque el insumo no existe.\n");
+        }
+        break;
+    case 6:
+        buscarInsumo(nombresInsumos, unidadMedida, proveedor, stockMinimo, encontrar, modificar);
+        if (*encontrar == 1)
+        {
+            if (strlen(tipoPresentacion[*modificar]) == 0)
             {
-                printf("Ingrese el nombre del producto numero %d:\n", i + 1);
-                leerCadenas(nombrePrueba, 20);
+                printf("Primero debe registrar una presentacion para este insumo.\n");
+            }
+            else
+            {
+                reposicion(modificar, cantidadInsumo);
+            }
+        }
+        else
+        {
+            printf("No se puede modificar el lote porque el insumo no existe.\n");
+        }
+        break;
+    case 7:
+        mostrarLote(nombresInsumos, unidadMedida, tipoPresentacion, cantidadInsumo, caducidad);
+        break;
+    case 8:
+        buscarInsumo(nombresInsumos, unidadMedida, proveedor, stockMinimo, encontrar, modificar);
+        if (*encontrar == 1)
+        {
+            if (strlen(tipoPresentacion[*modificar]) == 0)
+            {
+                printf("Este insumo todavia no tiene un lote registrado.\n");
+            }
+            else
+            {
+                editarLote(tipoPresentacion, cantidadInsumo, caducidad, modificar);
+            }
+        }
+        else
+        {
+            printf("No se puede editar el lote porque el insumo no existe.\n");
+        }
+        break;
+    }
+}
 
+void registrarInsumos(char nombresInsumos[5][40], char unidadMedida[5][20], char proveedor[5][40], float stockMinimo[5]){
+    int resp = 1;
+    int contadorInsumos = 0;
+    int i, repetido;
+    char nombrePrueba[40];
+
+    do{
+        printf("¿En que espacio desea registrar el insumo? (0 - 4)\n");
+        i = validarRangoIntMaxMin(0, 4);
+
+        if (stockMinimo[i] == 0){
+            do{
+                printf("Ingrese el nombre del insumo numero %d:\n", i + 1);
+                leerCadenas(nombrePrueba, 40);
                 repetido = 0;
 
-                for (int contador = 0; contador < 5; contador++)
-                {
-                    if (cantidadDemandada[contador] > 0 && strcasecmp(nombrePrueba,nombres[contador])==0){
-                        printf("Ya existe un producto con el mismo nombre\n");
+                if (strlen(nombrePrueba) == 0 || strcmp(nombrePrueba, "-") == 0){
+                    printf("Debe ingresar un nombre valido.\n");
+                    repetido = 1;
+                }
+
+                for (int j = 0; j < 5; j++){
+                    if (stockMinimo[j] > 0 && strcasecmp(nombrePrueba, nombresInsumos[j]) == 0){
+                        printf("Ya existe un insumo con el mismo nombre.\n");
                         repetido = 1;
+                        break;
                     }
                 }
             } while (repetido == 1);
 
-            strcpy(nombres[i],nombrePrueba);
-            
-            
-            printf("Ingrese el tiempo de fabricacion por unidad en minutos del producto numero %d:\n", i + 1);
-            tiempoFabricacion[i] = validarRangoFloatMinimo(0);
-            printf("Ingrese los recursos necesarios por unidad del producto numero %d:\n", i + 1);
-            recursosUnidad[i] = validarRangoInt(1);
-            printf("Ingrese la cantidad demandada del producto %d\n", i + 1);
-            cantidadDemandada[i] = validarRangoInt(1);
-            
+            strcpy(nombresInsumos[i], nombrePrueba);
+
+            printf("Ingrese la unidad de medida del insumo numero %d:\n", i + 1);
+            leerCadenas(unidadMedida[i], 20);
+            printf("Ingrese el proveedor habitual del insumo numero %d:\n", i + 1);
+            leerCadenas(proveedor[i], 40);
+            printf("Ingrese el stock minimo del insumo numero %d:\n", i + 1);
+            stockMinimo[i] = validarRangoFloatMinimo(0.0001);
+            printf("Insumo registrado correctamente.\n");
         }
-        else
-        {
-            printf("Error: el espacio seleccionado ya se encuentra ocupado\n");
+        else{
+            printf("Error: el espacio seleccionado ya se encuentra ocupado.\n");
         }
-        
-        contadorProductos = 0;
-        
-        for (int contador = 0; contador < 5; contador++)
-        {
-            if (cantidadDemandada[contador] > 0)
-            {
-                contadorProductos++;
+
+        contadorInsumos = 0;
+        for (int j = 0; j < 5; j++){
+            if (stockMinimo[j] > 0){
+                contadorInsumos++;
             }
         }
 
-        if (contadorProductos < 5){
-            printf("¿Desea ingresar otro producto? (1.si / 2.no)\n");
-            resp = validarRangoFloat(1,2);
+        if (contadorInsumos < 5){
+            printf("¿Desea ingresar otro insumo? (1.si / 2.no)\n");
+            resp = validarRangoIntMaxMin(1, 2);
         }
         else{
-            printf("Se ha completado el registro de 5 productos\n");
+            printf("Se ha completado el registro de 5 insumos.\n");
             resp = 2;
         }
-
     } while (resp == 1);
 }
 
-void mostrarProductos(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5]){
+void mostrarInsumos(char nombresInsumos[5][40], char unidadMedida[5][20], char proveedor[5][40], float stockMinimo[5]){
+    int contador = 0;
 
-    printf("==================================\n");
-    printf("PRODUCTOS REGISTRADOS\n");
-    printf("==================================\n");
-    printf("\n");
-    printf("%-30s %-20s %-10s %s\n", "Nombre", "Tiempo", "Recursos", "Demanda");
+    printf("INSUMOS REGISTRADOS:\n");
+    printf("%-25s %-15s %-18s %s\n", "Insumo", "Stock minimo", "Unidad", "Proveedor");
 
-    for (int i = 0; i < 5; i++)
-    {
-        printf("%-30s %-20.2f %-10d %d\n", nombres[i], tiempoFabricacion[i], recursosUnidad[i], cantidadDemandada[i]);
+    for (int i = 0; i < 5; i++){
+        if (stockMinimo[i] > 0){
+            printf("%-25s %-15.3f %-18s %s\n", nombresInsumos[i], stockMinimo[i], unidadMedida[i], proveedor[i]);
+            contador++;
+        }
     }
-    
+
+    if (contador == 0){
+        printf("No existen insumos registrados.\n");
+    }
 }
 
-void buscarProducto(char nombres[5][20], int *modificar, int *encontrar){
-    
-    char nombreBuscar[20];
-
+void buscarInsumo(char nombresInsumos[5][40], char unidadMedida[5][20], char proveedor[5][40], float stockMinimo[5], int *encontrar, int *modificar){
+    char nombreBuscar[40];
     *encontrar = 0;
-    
-    printf("Ingrese el nombre del producto:\n");
-    leerCadenas(nombreBuscar,20);
+    *modificar = 0;
 
-    for (int i = 0; i < 5; i++)
-    {
-        if (strcasecmp(nombreBuscar,nombres[i])==0){
+    printf("Ingrese el nombre del insumo:\n");
+    leerCadenas(nombreBuscar, 40);
+
+    for (int i = 0; i < 5; i++){
+        if (stockMinimo[i] > 0 && strcasecmp(nombreBuscar, nombresInsumos[i]) == 0){
             *modificar = i;
             *encontrar = 1;
             break;
@@ -211,122 +296,923 @@ void buscarProducto(char nombres[5][20], int *modificar, int *encontrar){
     }
 
     if (*encontrar == 1){
-        printf("El producto se ha encontrado correctamente\n");
+        printf("%-25s %-18s %-25s %s\n", "Insumo", "Unidad", "Proveedor", "Stock minimo");
+        printf("%-25s %-18s %-25s %.3f\n", nombresInsumos[*modificar], unidadMedida[*modificar], proveedor[*modificar], stockMinimo[*modificar]);
+        printf("El insumo se ha encontrado correctamente.\n");
     }
     else{
-        printf("El producto ingresado no existe\n");
+        printf("El insumo ingresado no existe.\n");
     }
 }
 
-void editarProducto(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5], int modificar){
-    
-    int opc;
-    
+void editarInsumo(char nombresInsumos[5][40], char unidadMedida[5][20], char proveedor[5][40], float stockMinimo[5], int modificar, char insumosTratamientos[5][5][40]){
+    int opc, repetido;
+    char nombreNuevo[40];
+    char nombreAnterior[40];
+
     printf("¿Que desea modificar?\n");
-    printf("1. Nombre del producto\n");
-    printf("2. Tiempo de fabricacion por unidad\n");
-    printf("3. Recursos necesarios por unidad\n");
-    printf("4. Cantidad demandada\n");
-    printf(">>");
-    opc = validarRangoFloat(1,4);
+    printf("1. Nombre del insumo\n");
+    printf("2. Unidad de medida\n");
+    printf("3. Proveedor\n");
+    printf("4. Stock minimo\n");
+    printf(">> ");
+    opc = validarRangoIntMaxMin(1, 4);
 
-    switch (opc)
-    {
+    switch (opc){
     case 1:
-        printf("Ingrese el nombre\n");
-        leerCadenas(nombres[modificar],20);
-        printf("El cambio se ha realizado con exito\n");
+        strcpy(nombreAnterior, nombresInsumos[modificar]);
+        repetido = 0;
+        do{
+            printf("Ingrese el nuevo nombre:\n");
+            leerCadenas(nombreNuevo, 40);
+            repetido = 0;
 
+            for (int i = 0; i < 5; i++){
+                if (i != modificar && stockMinimo[i] > 0 && strcasecmp(nombreNuevo, nombresInsumos[i]) == 0){
+                    repetido = 1;
+                    printf("Ya existe un insumo con ese nombre.\n");
+                    break;
+                }
+            }
+        } while (repetido == 1);
+
+        strcpy(nombresInsumos[modificar], nombreNuevo);
+
+        for (int i = 0; i < 5; i++){
+            for (int j = 0; j < 5; j++){
+                if (strcasecmp(insumosTratamientos[i][j], nombreAnterior) == 0){
+                    strcpy(insumosTratamientos[i][j], nombreNuevo);
+                }
+            }
+        }
+        printf("El cambio se ha realizado con exito.\n");
         break;
     case 2:
-        printf("Ingrese el tiempo de fabricacion por unidad en minutos\n");
-        tiempoFabricacion[modificar] = validarRangoFloatMinimo(0);
-        printf("El cambio se ha realizado con exito\n");
-
+        printf("Ingrese la nueva unidad de medida:\n");
+        leerCadenas(unidadMedida[modificar], 20);
+        printf("El cambio se ha realizado con exito.\n");
         break;
     case 3:
-        printf("Ingrese la cantidad de recursos necesarios por unidad\n");
-        recursosUnidad[modificar] = validarRangoInt(1);
-        printf("El cambio se ha realizado con exito\n");
-        
+        printf("Ingrese el nombre del nuevo proveedor:\n");
+        leerCadenas(proveedor[modificar], 40);
+        printf("El cambio se ha realizado con exito.\n");
         break;
     case 4:
-        printf("Ingrese la cantidad demandada\n");
-        cantidadDemandada[modificar] = validarRangoInt(1);
-        printf("El cambio se ha realizado con exito\n");
-
+        printf("Ingrese el nuevo stock minimo:\n");
+        stockMinimo[modificar] = validarRangoFloatMinimo(0.0001f);
+        printf("El cambio se ha realizado con exito.\n");
         break;
     }
 }
 
-void eliminarProducto(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5], int modificar){
-    
-    int resp = 0;
-    
-    printf("¿Esta seguro de eliminar el producto?: (1.si / 2.no)\n");
-    resp = validarRangoFloat(1,2);
-
-    if (resp == 1){
-        strcpy(nombres[modificar],"-");
-        tiempoFabricacion[modificar] = 0;
-        recursosUnidad[modificar] = 0;
-        cantidadDemandada[modificar] = 0;
-
-        printf("El producto se elimino correctamente\n");
+void registrarLote(int *modificar, char tipoPresentacion[5][20], char nombresInsumos[5][40], float cantidadInsumo[5], char caducidad[5][20]){
+    if (strlen(tipoPresentacion[*modificar]) > 0){
+        printf("Este insumo ya tiene una presentacion registrada. Utse la opcion de reposicion para agregar más cantidad\n");
+        return;
     }
-    else{
-        printf("Se cancelo la eliminacion del producto\n");
+
+    printf("Ingrese el tipo de presentacion para %s (ejemplo: jeringa, caja, frasco):\n", nombresInsumos[*modificar]);
+    leerCadenas(tipoPresentacion[*modificar], 20);
+
+    if (strlen(tipoPresentacion[*modificar]) == 0){
+        printf("Debe ingresar un tipo de presentacion.\n");
+        return;
+    }
+
+    printf("Ingrese la cantidad del lote:\n");
+    cantidadInsumo[*modificar] = validarRangoFloatMinimo(0.0001f);
+
+    printf("Ingrese la fecha de caducidad (formato dia/mes/anio):\n");
+    leerCadenas(caducidad[*modificar], 20);
+
+    if (strlen(caducidad[*modificar]) == 0){
+        printf("Debe ingresar una fecha de caducidad.\n");
+        tipoPresentacion[*modificar][0] = '\0';
+        cantidadInsumo[*modificar] = 0;
+        return;
+    }
+    printf("La presentacion se registro correctamente.\n");
+}
+
+void reposicion(int *modificar, float cantidadInsumo[5]){
+    int resp;
+    float cantidad;
+
+    printf("¿Desea reponer o quitar cantidad?: (1.reponer / 2.quitar)\n");
+    resp = validarRangoIntMaxMin(1, 2);
+
+    switch (resp) {
+        case 1:
+            printf("Ingrese la cantidad que desea reponer:\n");
+            cantidad = validarRangoFloatMinimo(0.0001f);
+            cantidadInsumo[*modificar] += cantidad;
+            printf("La reposicion se realizo correctamente.\n");
+            break;
+        case 2:
+            if (cantidadInsumo[*modificar] <= 0) {
+                printf("No existe cantidad disponible para retirar.\n");
+                break;
+            }
+            printf("Ingrese la cantidad que desea quitar:\n");
+            cantidad = validarRangoFloat(0.0001f, cantidadInsumo[*modificar]);
+            cantidadInsumo[*modificar] -= cantidad;
+            printf("El retiro se realizo correctamente.\n");
+            break;
     }
 }
 
-void calcularProduccion(char nombres[5][20], float tiempoFabricacion[5], int recursosUnidad[5], int cantidadDemandada[5], float *tiempoTotal, int *recursosTotales, int *calculoProduccion){
+void mostrarLote(char nombresInsumos[5][40], char unidadMedida[5][20], char tipoPresentacion[5][20], float cantidadInsumo[5], char caducidad[5][20]) {
+    int contador = 0;
 
-    *tiempoTotal = 0;
-    *recursosTotales = 0;
-    *calculoProduccion = 0;
+    printf("LOTES:\n");
+    printf("%-25s %-14s %-16s %-16s %s\n", "Insumo", "Cantidad", "Unidad", "Presentacion", "Caducidad");
 
-    printf("%-30s %-15s %s\n", "Producto", "Tiempo", "Recursos");
-
-    for (int i = 0; i < 5; i++)
-    {
-        if (cantidadDemandada[i] != 0){
-            float calculoTiempo = tiempoFabricacion[i]*cantidadDemandada[i];
-
-            *tiempoTotal += calculoTiempo;
-
-            int calculoRecursos = recursosUnidad[i]*cantidadDemandada[i];
-
-            *recursosTotales += calculoRecursos;
-
-            printf("%-30s %-15.2f %d\n", nombres[i], calculoTiempo, calculoRecursos);
+    for (int i = 0; i < 5; i++){
+        if (strlen(tipoPresentacion[i]) > 0){
+            printf("%-25s %-14.3f %-16s %-16s %s\n", nombresInsumos[i], cantidadInsumo[i], unidadMedida[i], tipoPresentacion[i], caducidad[i]);
+            contador++;
         }
     }
 
-    printf("Tiempo total:%.2f\n", *tiempoTotal);
-    printf("Recursos totales:%d\n", *recursosTotales);
-
-    *calculoProduccion = 1;
+    if (contador == 0){
+        printf("No existen lotes registrados.\n");
+    }
 }
 
-void verificarCapacidadProduccion(float tiempoTotal, int recursosTotales){
-    
-    float tiempoDisponible;
-    int recursosDisponibles;
+void editarLote(char tipoPresentacion[5][20], float cantidadInsumo[5], char caducidad[5][20], int *modificar){
+    int opc;
 
-    printf("Ingrese el tiempo de produccion disponible en minutos\n");
-    tiempoDisponible = validarRangoFloatMinimo(0);
-    printf("Ingrese la cantidad de recursos disponibles\n");
-    recursosDisponibles = validarRangoInt(0);
+    printf("¿Que desea modificar?\n");
+    printf("1. Tipo de presentacion\n");
+    printf("2. Cantidad del lote\n");
+    printf("3. Fecha de caducidad\n");
+    printf(">> ");
+    opc = validarRangoIntMaxMin(1, 3);
 
-    printf("%-25s %s\n", "Tiempo necesario", "Tiempo disponible");
-    printf("%-25.2f %.2f\n", tiempoTotal, tiempoDisponible);
-    printf("%-25s %s\n", "Recursos necesarios", "Recursos disponibles");
-    printf("%-25d %d\n", recursosTotales, recursosDisponibles);
-
-    if (tiempoTotal <= tiempoDisponible && recursosTotales <= recursosDisponibles){
-        printf("Estado: SUFICIENTE\n");
+    switch (opc){
+    case 1:
+        printf("Ingrese el nuevo tipo de presentacion:\n");
+        leerCadenas(tipoPresentacion[*modificar], 20);
+        printf("El cambio se ha realizado con exito.\n");
+        break;
+    case 2:
+        printf("Ingrese la nueva cantidad del lote:\n");
+        cantidadInsumo[*modificar] = validarRangoFloatMinimo(0.0001f);
+        printf("El cambio se ha realizado con exito.\n");
+        break;
+    case 3:
+        printf("Ingrese la nueva fecha de caducidad:\n");
+        leerCadenas(caducidad[*modificar], 20);
+        printf("El cambio se ha realizado con exito.\n");
+        break;
     }
-    else{
-        printf("Estado: INSUFICIENTE\n");
+}
+
+void gestionTratamientos(char tratamientos[5][40], char nombresInsumos[5][40], char unidadMedida[5][20], float stockMinimo[5], char insumosTratamientos[5][5][40], float cantidadesTratamientos[5][5], int modalidadesTratamientos[5][5], int cantidadInsumosTratamiento[5]){
+    int opcion;
+
+    do{
+        printf("Seleccione una opcion\n");
+        printf("1. Registrar un tratamiento\n");
+        printf("2. Agregar insumos a un tratamiento\n");
+        printf("3. Mostrar tratamientos registrados\n");
+        printf("4. Buscar tratamiento\n");
+        printf("5. Editar tratamientos\n");
+        printf("6. Regresar al menu principal\n");
+        printf(">> ");
+        opcion = validarRangoIntMaxMin(1, 6);
+
+        switch (opcion){
+        case 1:
+            registrarTratamiento(tratamientos);
+            break;
+        case 2:
+            agregarInsumoReceta(tratamientos, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+            break;
+        case 3:
+            mostrarTratamientos(tratamientos, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+            break;
+        case 4:
+            buscarTratamiento(tratamientos, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+            break;
+        case 5:
+            editarTratamiento(tratamientos, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+            break;
+        case 6:
+            printf("Regresando al menu principal >>\n");
+            break;
+        }
+    } while (opcion != 6);
+}
+
+void registrarTratamiento(char tratamientos[5][40]) {
+    int resp = 1, contadorTratamientos = 0, i, repetido;
+    char nombrePrueba[40];
+    do{
+        printf("¿En que espacio desea registrar el tratamiento? (0 - 4)\n");
+        i = validarRangoIntMaxMin(0, 4);
+
+        if (strcmp(tratamientos[i], "-") == 0){
+            do{
+                printf("Ingrese el nombre del tratamiento numero %d:\n", i + 1);
+                leerCadenas(nombrePrueba, 40);
+                repetido = 0;
+
+                if (strlen(nombrePrueba) == 0 || strcmp(nombrePrueba, "-") == 0){
+                    printf("Debe ingresar un nombre valido.\n");
+                    repetido = 1;
+                }
+
+                for (int j = 0; j < 5; j++) {
+                    if (strcmp(tratamientos[j], "-") != 0 && strcasecmp(nombrePrueba, tratamientos[j]) == 0) {
+                        printf("Ya existe un tratamiento con el mismo nombre.\n");
+                        repetido = 1;
+                        break;
+                    }
+                }
+            } while (repetido == 1);
+            strcpy(tratamientos[i], nombrePrueba);
+            printf("Tratamiento registrado correctamente.\n");
+        } else {
+            printf("Error: el espacio seleccionado ya se encuentra ocupado.\n");
+        }
+
+        contadorTratamientos = 0;
+        for (int j = 0; j < 5; j++) {
+            if (strcmp(tratamientos[j], "-") != 0) {
+                contadorTratamientos++;
+            }
+        }
+
+        if (contadorTratamientos < 5) {
+            printf("¿Desea ingresar otro tratamiento? (1.si / 2.no)\n");
+            resp = validarRangoIntMaxMin(1, 2);
+        } else {
+            printf("Se ha completado el registro de 5 tratamientos.\n");
+            resp = 2;
+        }
+    } while (resp == 1);
+}
+
+void agregarInsumoReceta(char tratamientos[5][40], char nombresInsumos[5][40], char unidadMedida[5][20], float stockMinimo[5], char insumosTratamientos[5][5][40], float cantidadesTratamientos[5][5], int modalidadesTratamientos[5][5], int cantidadInsumosTratamiento[5]) {
+    int posicionTratamiento, posicionInsumo, contTratamientos = 0, contInsumos = 0, repetido = 0, columna = 0, hayEspacio = 0, modalidad;
+    float cantidad;
+
+    printf("Tratamientos disponibles\n");
+    for (int i = 0; i < 5; i++){
+        if (strcmp(tratamientos[i], "-") != 0){
+            printf("%d. %s\n", i, tratamientos[i]);
+            contTratamientos++;
+        }
+    }
+
+    if (contTratamientos == 0){
+        printf("No existen tratamientos registrados.\n");
+        return;
+    }
+
+    printf("Ingrese la posicion del tratamiento que desea configurar (0 - 4):\n");
+    posicionTratamiento = validarRangoIntMaxMin(0, 4);
+
+    if (strcmp(tratamientos[posicionTratamiento], "-") == 0){
+        printf("El espacio seleccionado no contiene un tratamiento.\n");
+        return;
+    }
+
+    printf("Tratamiento seleccionado: %s\n", tratamientos[posicionTratamiento]);
+
+    if (cantidadInsumosTratamiento[posicionTratamiento] >= 5) {
+        printf("Este tratamiento ya tiene registrados 5 insumos.\n");
+        return;
+    }
+
+    printf("Insumis Disponibles\n");
+    for (int i = 0; i < 5; i++){
+        if (stockMinimo[i] > 0) {
+            printf("%d. %s\n", i, nombresInsumos[i]);
+            contInsumos++;
+        }
+    }
+    if (contInsumos == 0){
+        printf("No hay insumos registrados.\n");
+        return;
+    }
+
+    printf("Ingrese la posicion del insumo que desea agregar (0 - 4):\n");
+    posicionInsumo = validarRangoIntMaxMin(0, 4);
+
+    if (stockMinimo[posicionInsumo] == 0){
+        printf("El espacio seleccionado no contiene un insumo registrado.\n");
+        return;
+    }
+
+    repetido = 0;
+    for (int i = 0; i < 5; i++){
+        if (strcmp(insumosTratamientos[posicionTratamiento][i], "-") != 0 && strcasecmp(insumosTratamientos[posicionTratamiento][i], nombresInsumos[posicionInsumo]) == 0) {
+            printf("Este insumo ya se encuentra asociado al tratamiento.\n");
+            repetido = 1;
+            break;
+        }
+    }
+
+    if (repetido == 1) {
+        return;
+    }
+
+    for (int i = 0; i < 5; i++) {
+        if (strcmp(insumosTratamientos[posicionTratamiento][i], "-") == 0) {
+            columna = i;
+            hayEspacio = 1;
+            break;
+        }
+    }
+
+    if (hayEspacio == 0){
+        printf("No existen espacios disponibles para agregar otro insumo.\n");
+        return;
+    }
+
+    printf("Ingrese la cantidad de consumo del insumo:\n");
+    cantidad = validarRangoFloatMinimo(0.0001f);
+
+    printf("Seleccione la modalidad de consumo:\n");
+    printf("1. Por sesion\n");
+    printf("2. Por diente\n");
+    printf("3. Por procedimiento\n");
+    printf(">> ");
+    modalidad = validarRangoIntMaxMin(1, 3);
+
+    strcpy(insumosTratamientos[posicionTratamiento][columna], nombresInsumos[posicionInsumo]);
+    cantidadesTratamientos[posicionTratamiento][columna] = cantidad;
+    modalidadesTratamientos[posicionTratamiento][columna] = modalidad;
+    cantidadInsumosTratamiento[posicionTratamiento]++;
+
+    printf("Se ha agregado el insumo correctamente.\n");
+    printf("Tratamiento: %s\n", tratamientos[posicionTratamiento]);
+    printf("Insumo: %s\n", nombresInsumos[posicionInsumo]);
+    printf("Cantidad: %.3f %s\n", cantidad, unidadMedida[posicionInsumo]);
+
+    if (modalidad == 1){
+        printf("Modalidad: Por sesion\n");
+    } else if (modalidad == 2){
+        printf("Modalidad: Por diente\n");
+    } else{
+        printf("Modalidad: Por procedimiento\n");
+    }
+}
+
+void mostrarInsumosTratamiento(int posicionTratamiento, char nombresInsumos[5][40], char unidadMedida[5][20], float stockMinimo[5], char insumosTratamientos[5][5][40], float cantidadesTratamientos[5][5], int modalidadesTratamientos[5][5], int cantidadInsumosTratamiento[5]) {
+    int posicionInsumo, encontradoInsumo, hayInsumos = 0;
+
+    printf("Insumos del tratamiento:\n");
+
+    if (cantidadInsumosTratamiento[posicionTratamiento] == 0) {
+        printf("Este tratamiento no tiene insumos asociados.\n");
+        return;
+    }
+
+    for (int i = 0; i < 5; i++){
+        if (strcmp(insumosTratamientos[posicionTratamiento][i], "-") != 0){
+            hayInsumos++;
+            posicionInsumo = 0;
+            encontradoInsumo = 0;
+
+            for (int j = 0; j < 5; j++){
+                if (stockMinimo[j] > 0 && strcasecmp(nombresInsumos[j], insumosTratamientos[posicionTratamiento][i]) == 0) {
+                    posicionInsumo = j;
+                    encontradoInsumo = 1;
+                    break;
+                }
+            }
+
+            printf("\nPosicion %d: %s\n", i, insumosTratamientos[posicionTratamiento][i]);
+
+            if (encontradoInsumo == 1) {
+                printf("Cantidad: %.3f %s\n", cantidadesTratamientos[posicionTratamiento][i], unidadMedida[posicionInsumo]);
+            } else{
+                printf("Cantidad: %.3f (unidad no disponible en el catalogo)\n", cantidadesTratamientos[posicionTratamiento][i]);
+            }
+
+            if (modalidadesTratamientos[posicionTratamiento][i] == 1) {
+                printf("Modalidad: Por sesion\n");
+            } else if (modalidadesTratamientos[posicionTratamiento][i] == 2) {
+                printf("Modalidad: Por diente\n");
+            } else if (modalidadesTratamientos[posicionTratamiento][i] == 3) {
+                printf("Modalidad: Por procedimiento\n");
+            }
+        }
+    }
+
+    if (hayInsumos == 0) {
+        printf("Este tratamiento no tiene insumos asociados.\n");
+    }
+}
+
+void mostrarTratamientos(char tratamientos[5][40], char nombresInsumos[5][40], char unidadMedida[5][20], float stockMinimo[5], char insumosTratamientos[5][5][40], float cantidadesTratamientos[5][5], int modalidadesTratamientos[5][5], int cantidadInsumosTratamiento[5]) {
+    int contTratamientos = 0, posicionInsumo, encontradoInsumo;
+
+    printf("Tratamientos:\n");
+
+    for (int i = 0; i < 5; i++) {
+        if (strcmp(tratamientos[i], "-") != 0){
+            contTratamientos++;
+            printf("\nTRATAMIENTO: %s\n", tratamientos[i]);
+
+            if (cantidadInsumosTratamiento[i] == 0){
+                printf("Este tratamiento todavia no tiene insumos asociados.\n");
+            } else {
+                printf("INSUMOS ASOCIADOS:\n");
+
+                for (int j = 0; j < 5; j++){
+                    if (strcmp(insumosTratamientos[i][j], "-") != 0) {
+                        posicionInsumo = 0;
+                        encontradoInsumo = 0;
+
+                        for (int k = 0; k < 5; k++){
+                            if (stockMinimo[k] > 0 && strcasecmp(nombresInsumos[k], insumosTratamientos[i][j]) == 0){
+                                posicionInsumo = k;
+                                encontradoInsumo = 1;
+                                break;
+                            }
+                        }
+
+                        printf("\n%d. %s\n", j, insumosTratamientos[i][j]);
+
+                        if (encontradoInsumo == 1){
+                            printf("Cantidad: %.3f %s\n", cantidadesTratamientos[i][j], unidadMedida[posicionInsumo]);
+                        } else{
+                            printf("Cantidad: %.3f (unidad no disponible en el catalogo)\n", cantidadesTratamientos[i][j]);
+                        }
+
+                        if (modalidadesTratamientos[i][j] == 1){
+                            printf("Modalidad: Por sesion\n");
+                        } else if (modalidadesTratamientos[i][j] == 2){
+                            printf("Modalidad: Por diente\n");
+                        } else if (modalidadesTratamientos[i][j] == 3){
+                            printf("Modalidad: Por procedimiento\n");
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (contTratamientos == 0) {
+        printf("No existen tratamientos registrados.\n");
+    }
+}
+
+void buscarTratamiento(char tratamientos[5][40], char nombresInsumos[5][40], char unidadMedida[5][20], float stockMinimo[5], char insumosTratamientos[5][5][40], float cantidadesTratamientos[5][5], int modalidadesTratamientos[5][5], int cantidadInsumosTratamiento[5]) {
+    char nombreBuscar[40];
+    int posicionTratamiento = 0, encontradoTratamiento = 0;
+
+    printf("Ingrese el nombre del tratamiento:\n");
+    leerCadenas(nombreBuscar, 40);
+
+    for (int i = 0; i < 5; i++) {
+        if (strcmp(tratamientos[i], "-") != 0 && strcasecmp(nombreBuscar, tratamientos[i]) == 0) {
+            posicionTratamiento = i;
+            encontradoTratamiento = 1;
+            break;
+        }
+    }
+
+    if (encontradoTratamiento == 0) {
+        printf("El tratamiento ingresado no existe.\n");
+        return;
+    }
+
+    printf("Tratamiento encontrado con exito\n");
+    printf("Nombre: %s\n", tratamientos[posicionTratamiento]);
+    mostrarInsumosTratamiento(posicionTratamiento, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+}
+
+void editarTratamiento(char tratamientos[5][40], char nombresInsumos[5][40], char unidadMedida[5][20], float stockMinimo[5], char insumosTratamientos[5][5][40], float cantidadesTratamientos[5][5], int modalidadesTratamientos[5][5], int cantidadInsumosTratamiento[5]){
+    char nombreBuscar[40], nombreNuevo[40];
+    int posicionTratamiento = 0, encontradoTratamiento = 0, posicionInsumo, posicionDetalle, opcion, repetido, modalidad;
+    float nuevaCantidad;
+
+    printf("Tratamientos:\n");
+    for (int i = 0; i < 5; i++){
+        if (strcmp(tratamientos[i], "-") != 0){
+            printf("%d. %s\n", i, tratamientos[i]);
+        }
+    }
+
+    printf("Ingrese el nombre del tratamiento que desea editar:\n");
+    leerCadenas(nombreBuscar, 40);
+
+    for (int i = 0; i < 5; i++){
+        if (strcmp(tratamientos[i], "-") != 0 && strcasecmp(nombreBuscar, tratamientos[i]) == 0){
+            posicionTratamiento = i;
+            encontradoTratamiento = 1;
+            break;
+        }
+    }
+
+    if (encontradoTratamiento == 0){
+        printf("El tratamiento ingresado no existe.\n");
+        return;
+    }
+    printf("Tratamiento seleccionado: %s\n", tratamientos[posicionTratamiento]);
+    do{
+        printf("¿Que desea modificar?\n");
+        printf("1. Nombre del tratamiento\n");
+        printf("2. Cambiar un insumo asociado\n");
+        printf("3. Modificar cantidad de consumo\n");
+        printf("4. Modificar modalidad de consumo\n");
+        printf("5. Eliminar un insumo de la receta\n");
+        printf("6. Regresar\n");
+        printf(">> ");
+        opcion = validarRangoIntMaxMin(1, 6);
+
+        switch (opcion){
+        case 1:
+            repetido = 0;
+            do{
+                printf("Ingrese el nuevo nombre del tratamiento:\n");
+                leerCadenas(nombreNuevo, 40);
+                repetido = 0;
+
+                if (strlen(nombreNuevo) == 0 || strcmp(nombreNuevo, "-") == 0){
+                    printf("Debe ingresar un nombre valido.\n");
+                    repetido = 1;
+                }
+
+                for (int i = 0; i < 5; i++){
+                    if (i != posicionTratamiento && strcmp(tratamientos[i], "-") != 0 && strcasecmp(nombreNuevo, tratamientos[i]) == 0){
+                        printf("Ya existe un tratamiento con ese nombre.\n");
+                        repetido = 1;
+                        break;
+                    }
+                }
+            } while (repetido == 1);
+
+            strcpy(tratamientos[posicionTratamiento], nombreNuevo);
+            printf("El nombre del tratamiento se modifico correctamente.\n");
+            break;
+
+        case 2:
+            if (cantidadInsumosTratamiento[posicionTratamiento] == 0){
+                printf("Este tratamiento no tiene insumos registrados.\n");
+                break;
+            }
+
+            mostrarInsumosTratamiento(posicionTratamiento, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+
+            printf("Seleccione la posicion del insumo que desea cambiar (0 - 4):\n");
+            posicionDetalle = validarRangoIntMaxMin(0, 4);
+
+            if (strcmp(insumosTratamientos[posicionTratamiento][posicionDetalle], "-") == 0){
+                printf("La posicion seleccionada no contiene ningun insumo.\n");
+                break;
+            }
+
+            printf("\nINSUMOS DISPONIBLES\n");
+            for (int i = 0; i < 5; i++){
+                if (stockMinimo[i] > 0)
+                {
+                    printf("%d. %s\n", i, nombresInsumos[i]);
+                }
+            }
+
+            printf("Seleccione el nuevo insumo (0 - 4):\n");
+            posicionInsumo = validarRangoIntMaxMin(0, 4);
+
+            if (stockMinimo[posicionInsumo] == 0){
+                printf("El espacio seleccionado no contiene un insumo registrado.\n");
+                break;
+            }
+
+            repetido = 0;
+            for (int i = 0; i < 5; i++){
+                if (i != posicionDetalle && strcmp(insumosTratamientos[posicionTratamiento][i], "-") != 0 && strcasecmp(insumosTratamientos[posicionTratamiento][i], nombresInsumos[posicionInsumo]) == 0){
+                    printf("Este insumo ya se encuentra en la receta.\n");
+                    repetido = 1;
+                    break;
+                }
+            }
+
+            if (repetido == 1){
+                break;
+            }
+
+            printf("Ingrese la nueva cantidad de consumo:\n");
+            nuevaCantidad = validarRangoFloatMinimo(0.0001f);
+
+            printf("Seleccione la nueva modalidad:\n");
+            printf("1. Por sesion\n");
+            printf("2. Por diente\n");
+            printf("3. Por procedimiento\n");
+            modalidad = validarRangoIntMaxMin(1, 3);
+
+            strcpy(insumosTratamientos[posicionTratamiento][posicionDetalle], nombresInsumos[posicionInsumo]);
+            cantidadesTratamientos[posicionTratamiento][posicionDetalle] = nuevaCantidad;
+            modalidadesTratamientos[posicionTratamiento][posicionDetalle] = modalidad;
+            printf("El insumo se modifico correctamente.\n");
+            break;
+
+        case 3:
+            if (cantidadInsumosTratamiento[posicionTratamiento] == 0){
+                printf("Este tratamiento no tiene insumos registrados.\n");
+                break;
+            }
+
+            mostrarInsumosTratamiento(posicionTratamiento, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+
+            printf("Seleccione la posicion del insumo que desea modificar (0 - 4):\n");
+            posicionDetalle = validarRangoIntMaxMin(0, 4);
+
+            if (strcmp(insumosTratamientos[posicionTratamiento][posicionDetalle], "-") == 0){
+                printf("La posicion seleccionada no contiene ningun insumo.\n");
+                break;
+            }
+
+            printf("Ingrese la nueva cantidad de consumo:\n");
+            nuevaCantidad = validarRangoFloatMinimo(0.0001f);
+            cantidadesTratamientos[posicionTratamiento][posicionDetalle] = nuevaCantidad;
+            printf("La cantidad se modifico correctamente.\n");
+            break;
+
+        case 4:
+            if (cantidadInsumosTratamiento[posicionTratamiento] == 0){
+                printf("Este tratamiento no tiene insumos registrados.\n");
+                break;
+            }
+
+            mostrarInsumosTratamiento(posicionTratamiento, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+
+            printf("Seleccione la posicion del insumo que desea modificar (0 - 4):\n");
+            posicionDetalle = validarRangoIntMaxMin(0, 4);
+
+            if (strcmp(insumosTratamientos[posicionTratamiento][posicionDetalle], "-") == 0){
+                printf("La posicion seleccionada no contiene ningun insumo.\n");
+                break;
+            }
+
+            printf("Seleccione la nueva modalidad:\n");
+            printf("1. Por sesion\n");
+            printf("2. Por diente\n");
+            printf("3. Por procedimiento\n");
+            modalidad = validarRangoIntMaxMin(1, 3);
+
+            modalidadesTratamientos[posicionTratamiento][posicionDetalle] = modalidad;
+            printf("La modalidad se modifico correctamente.\n");
+            break;
+
+        case 5:
+            if (cantidadInsumosTratamiento[posicionTratamiento] == 0){
+                printf("Este tratamiento no tiene insumos registrados.\n");
+                break;
+            }
+
+            mostrarInsumosTratamiento(posicionTratamiento, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+
+            printf("Seleccione la posicion del insumo que desea eliminar (0 - 4):\n");
+            posicionDetalle = validarRangoIntMaxMin(0, 4);
+
+            if (strcmp(insumosTratamientos[posicionTratamiento][posicionDetalle], "-") == 0){
+                printf("La posicion seleccionada no contiene ningun insumo.\n");
+                break;
+            }
+
+            strcpy(insumosTratamientos[posicionTratamiento][posicionDetalle], "-");
+            cantidadesTratamientos[posicionTratamiento][posicionDetalle] = 0;
+            modalidadesTratamientos[posicionTratamiento][posicionDetalle] = 0;
+            cantidadInsumosTratamiento[posicionTratamiento]--;
+
+            printf("El insumo se elimino correctamente.\n");
+            break;
+
+        case 6:
+            printf("Regresando al menu de tratamientos...\n");
+            break;
+        }
+    } while (opcion != 6);
+}
+
+void capacidadTratamientos(char tratamientos[5][40], char nombresInsumos[5][40], char unidadMedida[5][20], float stockMinimo[5], char tipoPresentacion[5][20], float cantidadInsumo[5], char caducidad[5][20], char insumosTratamientos[5][5][40], float cantidadesTratamientos[5][5], int modalidadesTratamientos[5][5], int cantidadInsumosTratamiento[5]) {
+
+    int contInsumos = 0, contTratamientos = 0, contRecetas = 0, posicionTratamiento, posicionInsumo = 0, encontradoInsumo, cantidadProcedimientos, cantidadSesiones, cantidadDientes, tieneSesion, tieneDiente, resp = 2, tratamientosPlanificados = 0, recetaValida, tieneReceta, i, j, k, contInsuficientes = 0;
+    float demandaInsumos[5] = {0}, consumo, faltante;
+
+    for (i = 0; i < 5; i++){
+        if (stockMinimo[i] > 0){
+            contInsumos++;
+        }
+    }
+
+    if (contInsumos == 0){
+        printf("No existen insumos registrados\n");
+        return;
+    }
+
+    for (i = 0; i < 5; i++){
+        if (strcmp(tratamientos[i], "-") != 0){
+            contTratamientos++;
+        }
+    }
+
+    if (contTratamientos == 0){
+        printf("No existen tratamientos registrados\n");
+        return;
+    }
+
+    for (i = 0; i < 5; i++){
+        for (j = 0; j < 5; j++){
+            if (strcmp(insumosTratamientos[i][j], "-") != 0){
+                contRecetas++;
+            }
+        }
+    }
+
+    if (contRecetas == 0){
+        printf("No existen recetas registradas.\n");
+        printf("Primero debe agregar insumos a los tratamientos.\n");
+        return;
+    }
+
+    do{
+        printf("Tratamientos\n");
+
+        for (i = 0; i < 5; i++) {
+            if (strcmp(tratamientos[i], "-") != 0) {
+                printf("%d. %s\n", i, tratamientos[i]);
+            }
+        }
+
+        printf("Seleccione la posicion del tratamiento que desea realizar (0 - 4):\n");
+        posicionTratamiento = validarRangoIntMaxMin(0, 4);
+
+        if (strcmp(tratamientos[posicionTratamiento], "-") == 0) {
+            printf("El espacio seleccionado no contiene un tratamiento registrado.\n");
+            break;
+        }
+
+        tieneReceta = 0;
+
+        for (j = 0; j < 5; j++) {
+            if (strcmp(insumosTratamientos[posicionTratamiento][j], "-") != 0) {
+                tieneReceta = 1;
+            }
+        }
+
+        if (tieneReceta == 0) {
+            printf("El tratamiento seleccionado no tiene insumos asociados\n");
+            break;
+        }
+
+        recetaValida = 1;
+
+        for (j = 0; j < 5; j++){
+            if (strcmp(insumosTratamientos[posicionTratamiento][j], "-") != 0){
+
+                posicionInsumo = 0;
+                encontradoInsumo = 0;
+
+                for (k = 0; k < 5; k++){
+                    if (stockMinimo[k] > 0 && strcasecmp(nombresInsumos[k], insumosTratamientos[posicionTratamiento][j]) == 0){
+                        posicionInsumo = k;
+                        encontradoInsumo = 1;
+                        break;
+                    }
+                }
+
+                if (encontradoInsumo == 0){
+                    printf("El insumo %s no existe en el inventario.\n", insumosTratamientos[posicionTratamiento][j]);
+                    recetaValida = 0;
+                    break;
+                }
+
+                if (strlen(tipoPresentacion[posicionInsumo]) == 0 || strlen(caducidad[posicionInsumo]) == 0 || cantidadInsumo[posicionInsumo] <= 0) {
+                    printf("El insumo %s no tiene una presentacion completa registrada.\n", nombresInsumos[posicionInsumo]);
+                    printf("Primero debe registrar su presentacion, cantidad y caducidad.\n");
+                    recetaValida = 0;
+                    break;
+                }
+
+                if (cantidadesTratamientos[posicionTratamiento][j] <= 0 || modalidadesTratamientos[posicionTratamiento][j] < 1 || modalidadesTratamientos[posicionTratamiento][j] > 3) {
+                    printf("La receta del insumo %s tiene datos de consumo incorrectos.\n", nombresInsumos[posicionInsumo]);
+                    recetaValida = 0;
+                    break;
+                }
+            }
+        }
+
+        if (recetaValida == 0) {
+            break;
+        }
+
+        printf("Tratamiento seleccionado: %s\n", tratamientos[posicionTratamiento]);
+
+        printf("Ingrese la cantidad de tratamientos que desea realizar:\n");
+        cantidadProcedimientos = validarRangoInt(1);
+
+        if (cantidadProcedimientos == -1) {
+            break;
+        }
+
+        tieneSesion = 0;
+        tieneDiente = 0;
+
+        for (j = 0; j < 5; j++){
+
+            if (strcmp(insumosTratamientos[posicionTratamiento][j], "-") != 0){
+
+                if (modalidadesTratamientos[posicionTratamiento][j] == 1){
+                    tieneSesion = 1;
+                }
+
+                if (modalidadesTratamientos[posicionTratamiento][j] == 2){
+                    tieneDiente = 1;
+                }
+            }
+        }
+
+        cantidadSesiones = 0;
+
+        if (tieneSesion == 1) {
+            printf("Ingrese la cantidad total de sesiones:\n");
+            cantidadSesiones = validarRangoInt(1);
+
+            if (cantidadSesiones == -1) {
+                break;
+            }
+        }
+
+        cantidadDientes = 0;
+
+        if (tieneDiente == 1) {
+            printf("Ingrese la cantidad total de dientes que se intervendran:\n");
+            cantidadDientes = validarRangoInt(1);
+
+            if (cantidadDientes == -1) {
+                break;
+            }
+        }
+
+        for (j = 0; j < 5; j++){
+            if (strcmp(insumosTratamientos[posicionTratamiento][j], "-") != 0){
+
+                posicionInsumo = 0;
+                encontradoInsumo = 0;
+
+                for (k = 0; k < 5; k++){
+                    if (stockMinimo[k] > 0 && strcasecmp(nombresInsumos[k], insumosTratamientos[posicionTratamiento][j]) == 0) {
+                        posicionInsumo = k;
+                        encontradoInsumo = 1;
+                        break;
+                    }
+                }
+
+                if (encontradoInsumo == 1){
+
+                    consumo = 0;
+
+                    if (modalidadesTratamientos[posicionTratamiento][j] == 1) {
+                        consumo = cantidadesTratamientos[posicionTratamiento][j] * cantidadSesiones;
+                    }
+                    else if (modalidadesTratamientos[posicionTratamiento][j] == 2) {
+                        consumo = cantidadesTratamientos[posicionTratamiento][j] * cantidadDientes;
+                    }
+                    else if (modalidadesTratamientos[posicionTratamiento][j] == 3) {
+                        consumo = cantidadesTratamientos[posicionTratamiento][j] * cantidadProcedimientos;
+                    }
+
+                    demandaInsumos[posicionInsumo] += consumo;
+                }
+            }
+        }
+
+        tratamientosPlanificados++;
+
+        printf("El tratamiento se agrego correctamente\n");
+
+        printf("¿Desea agregar otro tratamiento?\n");
+        printf("1. Si\n");
+        printf("2. No\n");
+        resp = validarRangoIntMaxMin(1, 2);
+
+    } while (resp == 1);
+
+    printf("Resultados:\n");
+
+    printf("%-25s %-14s %-14s %-15s\n", "Insumo", "Demanda", "Cantidad", "Capacidad");
+
+    contInsuficientes = 0;
+
+    for (i = 0; i < 5; i++) {
+        if (demandaInsumos[i] > 0) {
+            printf("%-25s %-14.3f %-14.3f ", nombresInsumos[i], demandaInsumos[i], cantidadInsumo[i]);
+
+            if (cantidadInsumo[i] >= demandaInsumos[i]){
+                printf("%-15s\n", "SUFICIENTE");
+            }
+            else{
+                faltante = demandaInsumos[i] - cantidadInsumo[i];
+                printf("%-15s\n", "INSUFICIENTE");
+                printf("Faltan %.3f %s de %s.\n", faltante, unidadMedida[i], nombresInsumos[i]);
+                contInsuficientes++;
+            }
+        }
     }
 }
