@@ -13,6 +13,7 @@ int main (int argc, char *argv[]) {
     char caducidad[5][20] = {{0}}, tratamientos[5][40] = {"-", "-", "-", "-", "-"}, insumosTratamientos[5][5][40], tipoPresentacion[5][20] = {{0}};
     float stockMinimo[5] = {0}, cantidadInsumo[5] = {0}, cantidadesTratamientos[5][5] = {0};
     int opc, modificar = 0, encontrar = 0, modalidadesTratamientos[5][5] = {0}, cantidadInsumosTratamiento[5] = {0};
+    int respuesta = 1;
     for (int i = 0; i < 5; i++){
         for (int j = 0; j < 5; j++){
             strcpy(insumosTratamientos[i][j], "-");
@@ -33,27 +34,33 @@ int main (int argc, char *argv[]) {
         printf(">> ");
         opc = validarRangoIntMaxMin(1, 4);
 
-        switch (opc) {
-            case 1:
-                administrarInventario(&encontrar, &modificar, nombresInsumos, unidadMedida, proveedor, stockMinimo, tipoPresentacion, cantidadInsumo, caducidad, insumosTratamientos);
-                break;
+        switch (opc){
+        case 1:
+            administrarInventario(&encontrar, &modificar, nombresInsumos, unidadMedida, proveedor, stockMinimo, tipoPresentacion, cantidadInsumo, caducidad, insumosTratamientos);
+            break;
 
-            case 2:
-                gestionTratamientos(tratamientos, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
-                break;
+        case 2:
+            gestionTratamientos(tratamientos, nombresInsumos, unidadMedida, stockMinimo, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+            break;
 
-            case 3:
-                capacidadTratamientos(tratamientos, nombresInsumos, unidadMedida, stockMinimo, tipoPresentacion, cantidadInsumo, caducidad, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
-                break;
+        case 3:
+            capacidadTratamientos(tratamientos, nombresInsumos, unidadMedida, stockMinimo, tipoPresentacion, cantidadInsumo, caducidad, insumosTratamientos, cantidadesTratamientos, modalidadesTratamientos, cantidadInsumosTratamiento);
+            break;
 
-            case 4:
-                printf("========================================\n");
-                printf("GRACIAS POR UTILIZAR ESTE PROGRAMA\n");
-                printf("========================================\n");
-                break;
+        case 4:
+            printf("========================================\n");
+            printf("GRACIAS POR UTILIZAR ESTE PROGRAMA\n");
+            printf("========================================\n");
+            respuesta = 2;
+            break;
         }
-
-    } while (opc != 4);
+        
+        if (opc != 4){
+            printf("¿Desea seleccionar otra opcion?:(1.si/2.no)\n");
+            respuesta = validarRangoFloat(1, 2);
+        }
+        
+    } while (respuesta == 1);
 
     return 0;
 }
