@@ -7,8 +7,7 @@ float validarRangoFloat(float a, float b){
     float num;
     int val;
 
-    do
-    {
+    do{
         val = scanf(" %f", &num);
         while((getchar()) != '\n');
         
@@ -17,9 +16,8 @@ float validarRangoFloat(float a, float b){
         }
 
     } while (num < a || num > b || val != 1);
-
-    return num;
     
+    return num;
 }
 
 float validarRangoFloatMinimo(float a){
@@ -27,19 +25,16 @@ float validarRangoFloatMinimo(float a){
     float numMinimo;
     int val;
 
-    do
-    {
+    do{
         val = scanf(" %f", &numMinimo);
         while((getchar()) != '\n');
         
         if (val != 1 || numMinimo < a){
             printf("Error: el valor ingresado es incorrecto\n");
         }
-
     } while (val != 1 || numMinimo < a);
 
-    return numMinimo;
-    
+    return numMinimo;  
 }
 
 int validarRangoInt(int a){
@@ -124,8 +119,7 @@ void administrarInventario(int *encontrar, int *modificar, char nombresInsumos[5
     printf(">> ");
     opcion = validarRangoIntMaxMin(1, 8);
 
-    switch (opcion)
-    {
+    switch (opcion){
     case 1:
         registrarInsumos(nombresInsumos, unidadMedida, proveedor, stockMinimo);
         break;
@@ -137,42 +131,34 @@ void administrarInventario(int *encontrar, int *modificar, char nombresInsumos[5
         break;
     case 4:
         buscarInsumo(nombresInsumos, unidadMedida, proveedor, stockMinimo, encontrar, modificar);
-        if (*encontrar == 1)
-        {
+        if (*encontrar == 1){
             editarInsumo(nombresInsumos, unidadMedida, proveedor, stockMinimo, *modificar, insumosTratamientos);
         }
-        else
-        {
-            printf("No se puede editar porque el insumo no existe.\n");
+        else{
+            printf("No se puede editar, el insumo no existe.\n");
         }
         break;
     case 5:
         buscarInsumo(nombresInsumos, unidadMedida, proveedor, stockMinimo, encontrar, modificar);
-        if (*encontrar == 1)
-        {
+        if (*encontrar == 1){
             registrarLote(modificar, tipoPresentacion, nombresInsumos, cantidadInsumo, caducidad);
         }
-        else
-        {
-            printf("No se puede registrar el lote porque el insumo no existe.\n");
+        else{
+            printf("No se puede registrar, el insumo no existe.\n");
         }
         break;
     case 6:
         buscarInsumo(nombresInsumos, unidadMedida, proveedor, stockMinimo, encontrar, modificar);
-        if (*encontrar == 1)
-        {
-            if (strlen(tipoPresentacion[*modificar]) == 0)
-            {
+        if (*encontrar == 1){
+            if (strlen(tipoPresentacion[*modificar]) == 0){
                 printf("Primero debe registrar una presentacion para este insumo.\n");
             }
-            else
-            {
+            else{
                 reposicion(modificar, cantidadInsumo);
             }
         }
-        else
-        {
-            printf("No se puede modificar el lote porque el insumo no existe.\n");
+        else{
+            printf("No se puede modificar, el insumo no existe.\n");
         }
         break;
     case 7:
@@ -180,20 +166,16 @@ void administrarInventario(int *encontrar, int *modificar, char nombresInsumos[5
         break;
     case 8:
         buscarInsumo(nombresInsumos, unidadMedida, proveedor, stockMinimo, encontrar, modificar);
-        if (*encontrar == 1)
-        {
-            if (strlen(tipoPresentacion[*modificar]) == 0)
-            {
+        if (*encontrar == 1){
+            if (strlen(tipoPresentacion[*modificar]) == 0){
                 printf("Este insumo todavia no tiene un lote registrado.\n");
             }
-            else
-            {
+            else{
                 editarLote(tipoPresentacion, cantidadInsumo, caducidad, modificar);
             }
         }
-        else
-        {
-            printf("No se puede editar el lote porque el insumo no existe.\n");
+        else{
+            printf("No se puede editar el lote, el insumo no existe.\n");
         }
         break;
     }
