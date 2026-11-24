@@ -13,7 +13,6 @@ int main (int argc, char *argv[]) {
     char caducidad[5][20] = {{0}}, tratamientos[5][40] = {"-", "-", "-", "-", "-"}, insumosTratamientos[5][5][40], tipoPresentacion[5][20] = {{0}};
     float stockMinimo[5] = {0}, cantidadInsumo[5] = {0}, cantidadesTratamientos[5][5] = {0};
     int opc, modificar = 0, encontrar = 0, modalidadesTratamientos[5][5] = {0}, cantidadInsumosTratamiento[5] = {0};
-    int respuesta = 1;
     for (int i = 0; i < 5; i++){
         for (int j = 0; j < 5; j++){
             strcpy(insumosTratamientos[i][j], "-");
@@ -51,16 +50,10 @@ int main (int argc, char *argv[]) {
             printf("========================================\n");
             printf("GRACIAS POR UTILIZAR ESTE PROGRAMA\n");
             printf("========================================\n");
-            respuesta = 2;
             break;
         }
         
-        if (opc != 4){
-            printf("¿Desea seleccionar otra opcion?:(1.si/2.no)\n");
-            respuesta = validarRangoFloat(1, 2);
-        }
-        
-    } while (respuesta == 1);
+    } while (opc != 4);
 
     return 0;
 }
